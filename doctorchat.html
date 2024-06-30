@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Messages</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .navbar {
+            display: flex;
+            align-items: center;
+            background-color: #FA2A55;
+            color: white;
+            padding: 20px;
+            height: 30px;
+        }
+
+        .navbar .home-button {
+            display: flex;
+            align-items: center;
+            background-color: transparent;
+            color: white;
+            padding: 5px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 16px;
+        }
+
+        .navbar .home-button img {
+            margin-right: 10px;
+            width: 50px;
+            height: 50px;
+        }
+
+        .container {
+            display: flex;
+            flex: 1;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        .sidebar {
+            width: 30%;
+            background-color: #fff;
+            border-right: 1px solid #ccc;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .sidebar h2 {
+            margin-top: 0;
+        }
+
+        .conversation-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .conversation-list li {
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            background-color: #f1f1f1;
+            cursor: pointer;
+        }
+
+        .conversation-list li:hover {
+            background-color: #ddd;
+        }
+
+        .chat-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+        }
+
+        .chat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chat-header button {
+            background-color: #FA2A55;
+            color: white;
+            border: none;
+            padding: 10px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .chat-header button:hover {
+            background-color: #FA2A55;
+        }
+
+        .chat-box {
+            flex: 1;
+            border: 1px solid #ccc;
+            padding: 10px;
+            overflow-y: auto;
+            background-color: #f9f9f9;
+            margin-bottom: 10px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-box .message {
+            margin-bottom: 10px;
+            padding: 10px;
+            border-radius: 15px;
+            max-width: 60%;
+            display: flex;
+            align-items: center;
+            position: relative;
+        }
+
+        .chat-box .message.sent {
+            background-color: #c8e6c9;
+            align-self: flex-end;
+        }
+
+        .chat-box .message.received {
+            background-color: #e1f5fe;
+            align-self: flex-start;
+        }
+
+        .chat-box .message img {
+            border-radius: 50%;
+            margin-right: 10px;
+            width: 30px;
+            height: 30px;
+        }
+
+        .read-receipt {
+            position: absolute;
+            bottom: -15px;
+            right: 10px;
+            font-size: 12px;
+            color: #666;
+        }
+
+        .chat-input-section {
+            display: flex;
+        }
+
+        #chat-input {
+            flex: 1;
+            padding: 10px;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: #FA2A55;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #FA2A55;
+        }
+
+        .appointment-section {
+            display: none;
+            padding: 20px;
+            position: absolute;
+            top: 20%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            border-radius: 10px;
+        }
+
+        .notification {
+            display: none;
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: #28a745;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        .notification.show {
+            display: block;
+        }
+
+        .new-conversation-section {
+            display: none;
+            padding: 20px;
+            position: absolute;
+            top: 20%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            border-radius: 10px;
+        }
+
+        .close {
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            font-size: 30px;
+            cursor: pointer;
+        }
+
+        .new-conversation-section input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <a href="index.html" class="home-button">
+            <img src="images/homepage icon.png" alt="Home Icon" width="100" height="100">
+            Home
+        </a>
+    </div>
+    <div class="new-conversation-section" id="new-conversation-section">
+        <h2>New Conversation</h2>
+        <input type="text" id="new-conversation-input" placeholder="Enter doctor's name...">
+        <button onclick="addConversation()">Start Conversation</button>
+    </div>    
+    <div class="container">
+        <div class="sidebar">
+            <h2>Messages</h2>
+            <button onclick="toggleNewConversation()">New conversation</button>
+            <ul class="conversation-list" id="conversation-list">
+                <li onclick="startConversation('Dr. Burdell')">Dr. Burdell - OB/GYN</li>
+                <li onclick="startConversation('Dr. Buzz')">Dr. Buzz - OB/GYN</li>
+                <li onclick="startConversation('Dr. Cabrera')">Dr. Cabrera - Perinatologist</li>
+                <li onclick="startConversation('Dr. Whitaker')">Dr. Whitaker - OB/GYN</li>
+            </ul>
+        </div>
+        <div class="chat-section">
+            <div class="chat-header">
+                <h2 id="chat-with">Chat with Dr. Burdell</h2>
+                <button id="schedule-btn" onclick="toggleSchedule()">📅 Schedule Appointment</button>
+            </div>
+            <div class="chat-box" id="chat-box">
+                <!-- Messages will be displayed here -->
+            </div>
+            <div class="chat-input-section">
+                <input type="text" id="chat-input" placeholder="Type a message...">
+                <button onclick="sendMessage()">Send</button>
+            </div>
+        </div>
+        <div class="appointment-section" id="appointment-section">
+            <span class="close" onclick="closeAppointmentSection()">&times;</span>
+            <h2>Schedule Appointment</h2>
+            <label for="appointment-date">Choose a date:</label>
+            <input type="date" id="appointment-date">
+            <label for="appointment-time">Choose a time:</label>
+            <input type="time" id="appointment-time">
+            <button onclick="scheduleAppointment()">Schedule</button>
+        </div>
+    </div>
+    <div class="notification" id="notification">Appointment scheduled!</div>
+    <div class="new-conversation-section" id="new-conversation-section">
+        <h2>New Conversation</h2>
+        <input type="text" id="new-conversation-input" placeholder="Enter doctor's name...">
+        <button onclick="addConversation()">Start Conversation</button>
+    </div>
+
+    <script>
+        const chatBox = document.getElementById('chat-box');
+        const chatInput = document.getElementById('chat-input');
+        const readReceipts = document.getElementById('read-receipts');
+        const appointmentSection = document.getElementById('appointment-section');
+        const notification = document.getElementById('notification');
+
+        function sendMessage() {
+            const messageText = chatInput.value;
+            if (messageText.trim() === '') return;
+
+            const message = document.createElement('div');
+            message.classList.add('message', 'sent');
+            message.textContent = messageText;
+            chatBox.appendChild(message);
+            chatInput.value = '';
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            // Simulate doctor's response
+            setTimeout(() => {
+                const doctorMessage = document.createElement('div');
+                doctorMessage.classList.add('message', 'received');
+                const doctorImage = document.createElement('img');
+                doctorImage.src = 'images/doctor photo.png';
+                doctorMessage.appendChild(doctorImage);
+                const messageContent = document.createElement('span');
+                messageContent.textContent = "Doctor: " + getDoctorResponse();
+                doctorMessage.appendChild(messageContent);
+                chatBox.appendChild(doctorMessage);
+                chatBox.scrollTop = chatBox.scrollHeight;
+
+                // Add read receipt
+                const receipt = document.createElement('li');
+                receipt.textContent = `Doctor read your message: "${messageText}"`;
+                readReceipts.appendChild(receipt);
+            }, 1000);
+        }
+
+        function getDoctorResponse() {
+            const responses = [
+                "Please schedule an appointment.",
+                "Make sure to take your medication.",
+                "I will review your results and get back to you.",
+                "How are you feeling today?"
+            ];
+            return responses[Math.floor(Math.random() * responses.length)];
+        }
+
+        function toggleSchedule() {
+            if (appointmentSection.style.display === 'none') {
+                appointmentSection.style.display = 'block';
+            } else {
+                appointmentSection.style.display = 'none';
+            }
+        }
+
+        function scheduleAppointment() {
+            const appointmentDate = document.getElementById('appointment-date').value;
+            const appointmentTime = document.getElementById('appointment-time').value;
+            if (!appointmentDate || !appointmentTime) {
+                alert("Please choose a date and time.");
+                return;
+            }
+
+            alert(`Appointment scheduled for ${appointmentDate} at ${appointmentTime}`);
+            appointmentSection.style.display = 'none';
+
+            // Show notification
+            notification.textContent = `Appointment scheduled for ${appointmentDate} at ${appointmentTime}`;
+            notification.classList.add('show');
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        function toggleNewConversation() {
+            newConversationSection.style.display = (newConversationSection.style.display === 'block') ? 'none' : 'block';
+        }
+
+        function addConversation() {
+            const newConversationInput = document.getElementById('new-conversation-input').value.trim();
+            if (newConversationInput === '') {
+                alert('Please enter a doctor\'s name.');
+                return;
+            }
+
+            const newConversationItem = document.createElement('li');
+            newConversationItem.textContent = newConversationInput;
+            newConversationItem.onclick = () => startConversation(newConversationInput);
+            conversationList.appendChild(newConversationItem);
+
+            newConversationSection.style.display = 'none';
+            document.getElementById('new-conversation-input').value = '';
+            startConversation(newConversationInput);
+        }
+
+        function startConversation(doctorName) {
+            currentChat = doctorName;
+            document.getElementById('chat-with').textContent = `Chat with ${doctorName}`;
+            chatBox.innerHTML = ''; // Clear chat box for new conversation
+        }
+        function closeAppointmentSection() {
+            appointmentSection.style.display = 'none';
+        }
+
+    </script>
+</body>
+</html>
